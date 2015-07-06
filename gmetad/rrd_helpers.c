@@ -87,11 +87,34 @@ reconnect:
          *conn = c;
       }
 
-   cmd = calloc(1, strlen(rrd) + 128);
+   unsigned int rrd_len = strlen(rrd);
+   char rrd2[rrd_len];
+
+   unsigned int rcount = 0;
+   for (int ii=0; ii<rrd_len; ii++){
+      if (ii>=4){
+         if (rrd[ii-4]=='.' && rrd[ii-3]=='r' && rrd[ii-2]=='r' && rrd[ii-1]=='d'){
+            break;
+         }
+      }
+      if (rrd[ii]==' '){
+         rrd2[rcount]='\\';
+         rrd2[rcount+1]=' ';
+         rcount = rcount + 2;
+      }
+      else{
+         rrd2[rcount]=rrd[ii];
+         rcount++;
+      }
+   }
+   rrd2[rcount] = '\0';
+ 
+   // cmd = calloc(1, strlen(rrd) + 128);
+   cmd = calloc(1, rrd_len + 128);
    if (num)
-         sprintf(cmd, "UPDATE %s %u:%s:%s\n", rrd, process_time, sum, num);
+         sprintf(cmd, "UPDATE %s %u:%s:%s\n", rrd2, process_time, sum, num);
    else
-         sprintf(cmd, "UPDATE %s %u:%s\n", rrd, process_time, sum);
+         sprintf(cmd, "UPDATE %s %u:%s\n", rrd2, process_time, sum);
 
    l = strlen(cmd);
    off = 0;
